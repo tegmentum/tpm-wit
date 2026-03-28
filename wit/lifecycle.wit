@@ -1,0 +1,32 @@
+package tegmentum:tpm@0.1.0;
+
+/// TPM lifecycle management: initialization, termination, and version selection.
+interface lifecycle {
+    use types.{tpm-version, tpm-error, blob-type};
+
+    /// Return the library version as a packed integer:
+    /// major in bits 23-16, minor in bits 15-8, micro in bits 7-0.
+    /// Example: version 0.10.1 returns 0x000a01.
+    get-version: func() -> u32;
+
+    /// Select the TPM specification version to emulate.
+    /// Must be called before init. Defaults to TPM 1.2 if not called.
+    choose-version: func(version: tpm-version) -> result<_, tpm-error>;
+
+    /// Initialize the TPM and prepare for command processing.
+    /// Must be called after choose-version and after setting any
+    /// pre-existing state via the state interface.
+    init: func() -> result<_, tpm-error>;
+
+    /// Shut down the TPM and release all internal resources.
+    /// May call init again after termination.
+    terminate: func();
+
+    /// Returns true if the TPM has been through manufacturing
+    /// (i.e., has valid permanent state).
+    was-manufactured: func() -> bool;
+
+    /// Decode a base64-encoded state blob with BEGIN/END markers.
+    /// Returns the raw binary state data.
+    decode-blob: func(data: string, blob-type: blob-type) -> result<list<u8>, tpm-error>;
+}

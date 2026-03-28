@@ -1,0 +1,27 @@
+package tegmentum:tpm@0.1.0;
+
+/// TPM state management: save, restore, and validate persistent state blobs.
+interface state {
+    use types.{state-type, state-validation-flags, tpm-error};
+
+    /// Retrieve the current TPM state of the given type.
+    /// Before init: returns previously-set blob or reads from storage.
+    /// After init: returns live state of the running TPM.
+    get-state: func(st: state-type) -> result<list<u8>, tpm-error>;
+
+    /// Load TPM state of the given type from a blob.
+    /// Must be called before init. Permanent state must be set first
+    /// before volatile or save-state. Passing an empty list hides
+    /// the corresponding file-based state.
+    set-state: func(st: state-type, data: list<u8>) -> result<_, tpm-error>;
+
+    /// Validate state blobs for version compatibility (e.g., during migration).
+    /// Multiple state types can be validated at once using the flags.
+    /// Must be called before init. Load permanent state first before
+    /// validating volatile state.
+    validate-state: func(st: state-validation-flags, validation-flags: u32) -> result<_, tpm-error>;
+
+    /// Store all volatile state into a single blob.
+    /// Useful for live migration or suspend-to-disk.
+    volatile-all-store: func() -> result<list<u8>, tpm-error>;
+}

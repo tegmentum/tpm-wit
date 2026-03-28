@@ -1,0 +1,27 @@
+package tegmentum:tpm@0.1.0;
+
+/// A software TPM implementation backed by persistent storage.
+/// The host provides NVRAM storage and I/O context; the component
+/// exports the full TPM API including lifecycle, command processing,
+/// state management, configuration, and TIS functions.
+world software-tpm {
+    import storage;
+    import io;
+
+    export lifecycle;
+    export commands;
+    export state;
+    export config;
+    export tis;
+}
+
+/// A minimal TPM for testing without external dependencies.
+/// The component manages its own ephemeral in-memory state.
+/// State is lost when the component instance is destroyed.
+world ephemeral-tpm {
+    export lifecycle;
+    export commands;
+    export state;
+    export config;
+    export tis;
+}

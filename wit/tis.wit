@@ -1,0 +1,26 @@
+package tegmentum:tpm@0.1.0;
+
+/// TPM Interface Specification (TIS) functions.
+/// These are primarily used with TPM 1.2 for hash operations
+/// and the TPM Established bit management.
+interface tis {
+    use types.{tpm-error};
+
+    /// Begin a hash sequence for the extend-to-PCR-17 locality 4 hash.
+    hash-start: func() -> result<_, tpm-error>;
+
+    /// Feed data into the active hash sequence.
+    hash-data: func(data: list<u8>) -> result<_, tpm-error>;
+
+    /// Complete the hash sequence and extend the result into PCR 17.
+    hash-end: func() -> result<_, tpm-error>;
+
+    /// Query whether the TPM Established bit is set.
+    /// This bit indicates whether the CRTM has executed the
+    /// hash sequence since the last reset.
+    tpm-established-get: func() -> result<bool, tpm-error>;
+
+    /// Reset the TPM Established bit.
+    /// Only permitted from locality 3 or 4.
+    tpm-established-reset: func() -> result<_, tpm-error>;
+}

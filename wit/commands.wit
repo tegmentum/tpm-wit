@@ -1,0 +1,14 @@
+package tegmentum:tpm@0.1.0;
+
+/// TPM command processing.
+interface commands {
+    use types.{tpm-error};
+
+    /// Submit a raw TPM command and receive the response.
+    /// The command buffer contains a complete TPM command structure.
+    /// Returns the complete TPM response structure on success.
+    process: func(command: list<u8>) -> result<list<u8>, tpm-error>;
+
+    /// Request cancellation of the currently executing command.
+    cancel-command: func() -> result<_, tpm-error>;
+}

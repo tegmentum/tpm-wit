@@ -1,0 +1,26 @@
+package tegmentum:tpm@0.1.0;
+
+/// NVRAM storage interface. The host must provide this implementation.
+/// The TPM component calls these functions when it needs to persist
+/// or retrieve state blobs (permanent, volatile, save-state).
+interface storage {
+    use types.{tpm-error};
+
+    /// Initialize the storage backend.
+    /// Called once during TPM initialization.
+    init: func() -> result<_, tpm-error>;
+
+    /// Load a named state blob from persistent storage.
+    /// Well-known names: "permall", "savestate", "volatilestate".
+    /// tpm-number identifies which TPM instance (typically 0).
+    /// Should return a tpm-error equivalent to TPM_RETRY if the
+    /// named blob does not exist.
+    load-data: func(tpm-number: u32, name: string) -> result<list<u8>, tpm-error>;
+
+    /// Store a named state blob to persistent storage.
+    store-data: func(data: list<u8>, tpm-number: u32, name: string) -> result<_, tpm-error>;
+
+    /// Delete a named state blob from persistent storage.
+    /// If must-exist is true, returns an error if the name is not found.
+    delete-name: func(tpm-number: u32, name: string, must-exist: bool) -> result<_, tpm-error>;
+}

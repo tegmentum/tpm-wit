@@ -1,0 +1,20 @@
+package tegmentum:tpm@0.1.0;
+
+/// I/O context interface. The host must provide this implementation.
+/// The TPM component calls these functions to determine the execution
+/// context (locality and physical presence) for each command.
+interface io {
+    use types.{tpm-error};
+
+    /// Initialize the I/O subsystem.
+    /// Called once during TPM initialization.
+    init: func() -> result<_, tpm-error>;
+
+    /// Get the current locality modifier for the given TPM instance.
+    /// Returns a value 0-4 indicating the requesting locality.
+    get-locality: func(tpm-number: u32) -> result<u32, tpm-error>;
+
+    /// Get the physical presence assertion state for the given TPM instance.
+    /// Returns true if physical presence is currently asserted.
+    get-physical-presence: func(tpm-number: u32) -> result<bool, tpm-error>;
+}

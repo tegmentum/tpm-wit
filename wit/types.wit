@@ -1,0 +1,102 @@
+package tegmentum:tpm@0.1.0;
+
+/// Shared types for all TPM interfaces.
+interface types {
+    /// A TPM result code. Non-zero values are TPM-version-specific error codes.
+    /// See TCG TPM 1.2 Part 2 Section 17 or TPM 2.0 Part 2 Section 6.6.3.
+    type tpm-error = u32;
+
+    /// TPM implementation version.
+    enum tpm-version {
+        /// TPM 1.2 specification
+        tpm12,
+        /// TPM 2.0 specification
+        tpm20,
+    }
+
+    /// Categories of persistent TPM state.
+    enum state-type {
+        /// Permanent/NV state (endorsement hierarchy, owner auth, etc.)
+        permanent,
+        /// Volatile state (PCR values, sessions, loaded keys, etc.)
+        volatile,
+        /// Saved state for S3/suspend resume
+        save-state,
+    }
+
+    /// Bitmask of state types for validation. Unlike state-type, multiple
+    /// categories can be validated in a single call.
+    flags state-validation-flags {
+        permanent,
+        volatile,
+        save-state,
+    }
+
+    /// Informational query categories (can be combined).
+    flags info-flags {
+        /// TPM specification family, level, and revision
+        tpm-specification,
+        /// Manufacturer, model, firmware version
+        tpm-attributes,
+        /// Supported RSA key sizes and other feature info
+        tpm-features,
+        /// Currently enabled algorithms and ECC curves
+        runtime-algorithms,
+        /// Currently enabled command codes
+        runtime-commands,
+        /// Active profile name and configuration
+        active-profile,
+        /// All available profile definitions
+        available-profiles,
+    }
+
+    /// Well-known TPM property identifiers.
+    enum tpm-property {
+        /// Maximum supported RSA key length in bits
+        rsa-key-length-max,
+        /// Maximum command/response buffer size
+        buffer-max,
+        /// Number of key handle slots
+        key-handles,
+        /// Number of owner-evict key handle slots
+        owner-evict-key-handles,
+        /// Minimum number of authorization sessions
+        min-auth-sessions,
+        /// Minimum number of transport sessions
+        min-trans-sessions,
+        /// Minimum number of DAA sessions
+        min-daa-sessions,
+        /// Minimum session list size
+        min-session-list,
+        /// Minimum number of monotonic counters
+        min-counters,
+        /// Minimum family table entries
+        num-family-table-entry-min,
+        /// Minimum delegate table entries
+        num-delegate-table-entry-min,
+        /// Safety margin for state blob sizes
+        space-safety-margin,
+        /// Maximum NV (permanent) state space in bytes
+        max-nv-space,
+        /// Maximum save-state blob size in bytes
+        max-savestate-space,
+        /// Maximum volatile state blob size in bytes
+        max-volatilestate-space,
+    }
+
+    /// Blob encoding types for decode-blob.
+    enum blob-type {
+        /// Base64-encoded init state blob with BEGIN/END markers
+        initstate,
+    }
+
+    /// Result of set-buffer-size, reporting actual and allowed range.
+    record buffer-size-info {
+        /// The actual buffer size that was set
+        size: u32,
+        /// The minimum allowed buffer size
+        min-size: u32,
+        /// The maximum allowed buffer size
+        max-size: u32,
+    }
+}

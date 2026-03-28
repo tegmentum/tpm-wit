@@ -1,0 +1,32 @@
+package tegmentum:tpm@0.1.0;
+
+/// TPM configuration: properties, buffer sizing, profiles, info, and debug.
+interface config {
+    use types.{tpm-property, info-flags, buffer-size-info, tpm-error};
+
+    /// Query a TPM property value by identifier.
+    get-property: func(prop: tpm-property) -> result<s32, tpm-error>;
+
+    /// Set the TPM command/response buffer size.
+    /// Pass 0 to query current size without modification.
+    /// Must be called after choose-version but before init.
+    /// Returns the actual size set along with the min/max bounds.
+    set-buffer-size: func(wanted-size: u32) -> result<buffer-size-info, tpm-error>;
+
+    /// Set the TPM operational profile as a JSON string.
+    /// Available profiles include "null", "default", "default-v1", and "custom".
+    /// Must be called before init.
+    set-profile: func(profile: string) -> result<_, tpm-error>;
+
+    /// Query TPM information as a JSON string.
+    /// Multiple info categories can be requested at once using flags.
+    /// Returns an empty JSON object if no flags are set.
+    get-info: func(info: info-flags) -> string;
+
+    /// Set the debug verbosity level. Debug output is written to WASI stderr.
+    /// Level 0 disables debug output.
+    set-debug-level: func(level: u32);
+
+    /// Set a prefix string prepended to all debug messages.
+    set-debug-prefix: func(prefix: string) -> result<_, tpm-error>;
+}
