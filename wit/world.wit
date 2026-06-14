@@ -1,9 +1,84 @@
 package tegmentum:tpm@0.1.0;
 
+// ===========================================================================
+// Common capability subset (shared by TPM 1.2 and TPM 2.0)
+//
+// The TPM specification version is chosen at runtime via
+// `lifecycle.choose-version`, and the raw command bytes carry the
+// version-specific command structures. As a result the lifecycle, command,
+// state and configuration surfaces are byte-for-byte identical for both
+// versions — they form the common subset. A consumer that only needs this
+// subset (or selects the version at runtime) can target the common worlds.
+// ===========================================================================
+
+/// Self-contained common core (ephemeral, in-memory state; no host imports).
+world tpm-common {
+    export lifecycle;
+    export commands;
+    export state;
+    export config;
+}
+
+/// Software-backed common core: the host provides NVRAM storage and I/O
+/// context (locality / physical presence).
+world tpm-common-software {
+    import storage;
+    import io;
+
+    export lifecycle;
+    export commands;
+    export state;
+    export config;
+}
+
+// ===========================================================================
+// TPM 1.2
+//
+// Adds the TIS interface: the locality-4 / PCR-17 measured-boot hash sequence
+// and the TPM Established bit. These capabilities are rooted in the TPM 1.2 /
+// TPM_TIS specification.
+// ===========================================================================
+
+/// Ephemeral TPM 1.2 (common subset + TIS).
+world ephemeral-tpm-1-2 {
+    include tpm-common;
+    export tis;
+}
+
+/// Software-backed TPM 1.2 (common subset + TIS).
+world software-tpm-1-2 {
+    include tpm-common-software;
+    export tis;
+}
+
+// ===========================================================================
+// TPM 2.0
+//
+// Uses the common subset. TPM 2.0-specific behaviour is expressed through the
+// command stream (TPM2_* command codes carried by `commands.process`) rather
+// than additional WIT functions, so the 2.0 worlds add no new interface.
+// ===========================================================================
+
+/// Ephemeral TPM 2.0 (common subset).
+world ephemeral-tpm-2-0 {
+    include tpm-common;
+}
+
+/// Software-backed TPM 2.0 (common subset).
+world software-tpm-2-0 {
+    include tpm-common-software;
+}
+
+// ===========================================================================
+// Backward-compatible unified worlds
+//
+// Export the full surface of both versions (the common subset + TIS). The
+// running version is whatever `lifecycle.choose-version` selects. Retained so
+// existing consumers (e.g. libtpms-wasm) build unchanged; new consumers should
+// prefer a version-specific world above.
+// ===========================================================================
+
 /// A software TPM implementation backed by persistent storage.
-/// The host provides NVRAM storage and I/O context; the component
-/// exports the full TPM API including lifecycle, command processing,
-/// state management, configuration, and TIS functions.
 world software-tpm {
     import storage;
     import io;
@@ -15,9 +90,9 @@ world software-tpm {
     export tis;
 }
 
-/// A minimal TPM for testing without external dependencies.
-/// The component manages its own ephemeral in-memory state.
-/// State is lost when the component instance is destroyed.
+/// A minimal TPM for testing without external dependencies. The component
+/// manages its own ephemeral in-memory state, lost when the instance is
+/// destroyed.
 world ephemeral-tpm {
     export lifecycle;
     export commands;
